@@ -1,9 +1,9 @@
 -- @description Create Impulse Response (IR) of the FX Chain of the selected Track
 -- @author amagalma
--- @version 2.02
+-- @version 2.03
 -- @changelog
---   - Ensure no orphan reapeak is left behind
---   - Ensure that track name does not change
+--   - Support custom ReaVerb name
+-- @donation https://www.paypal.me/amagalma
 -- @link https://forum.cockos.com/showthread.php?t=234517
 -- @about
 --   # Creates an impulse response (IR) of the FX Chain of the first selected track.
@@ -19,20 +19,20 @@
 
 -- Thanks to EUGEN27771, spk77, X-Raym, Lokasenna
 
-local version = "2.02"
+local version = "2.03"
 --------------------------------------------------------------------------------------------
 
 
 -- ENTER HERE DEFAULT VALUES:
-local Max_IR_Lenght = 5 -- Seconds
-local Normalize_Peak = -0.4 -- (must be less than 0)
+local Max_IR_Lenght = 2 -- Seconds
+local Normalize_Peak = -0.3 -- (must be less than 0)
 local Normalize_Enable = 1 -- (1 = enabled, 0 = disabled)
-local Trim_Silence_Below = -100 -- (must be less than -60)
+local Trim_Silence_Below = -120 -- (must be less than -60)
 local Trim_Silence_Enable = 1 -- (1 = enabled, 0 = disabled)
-local Mono_Or_Stereo = 2 -- (1: mono, 2: stereo)
+local Mono_Or_Stereo = 1 -- (1: mono, 2: stereo)
 local Locate_In_Explorer = 1 -- (1 = yes, 0 = no)
 local Insert_In_Project = 0 -- (1 = yes, 0 = no)
-local Load_in_Reaverb = 1 -- (1 = yes, 0 = no)
+local Load_in_Reaverb = 0 -- (1 = yes, 0 = no)
 
 
 --------------------------------------------------------------------------------------------
@@ -597,7 +597,9 @@ function CreateIR()
     end
     local pos = reaper.TrackFX_AddByName( track, "ReaVerb", false, -1 )
     reaper.TrackFX_Show( track, pos, 3 )
-    local fxhwnd = reaper.JS_Window_Find( "ReaVerb (Cockos)", false )
+    local rv, window_name = reaper.TrackFX_GetFXName( track, pos, "" )
+    local window_name = rv and window_name or "ReaVerb (Cockos)"
+    local fxhwnd = reaper.JS_Window_Find( window_name, false )
     local _, list = reaper.JS_Window_ListAllChild( fxhwnd )
     local addbutton
     for address in list:gmatch("[^,]+") do
